@@ -1,0 +1,24 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "UnrealFastNoise2",
+	"Description": "Wraps FastNoise2 (https://github.com/Auburn/FastNoise2), allowing you to use the FastNoise2 library in blueprints.",
+	"Category": "Other",
+	"CreatedBy": "DoubleDeez",
+	"CreatedByURL": "http://github.com/DoubleDeez",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": false,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "UnrealFastNoise2",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}
