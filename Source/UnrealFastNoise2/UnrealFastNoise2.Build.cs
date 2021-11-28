@@ -25,7 +25,8 @@ public class UnrealFastNoise2 : ModuleRules
 			{
 				"Core",
 				"Engine",
-				"Projects"
+				"Projects",
+				"FastNoise2"
 			}
 			);
 			
@@ -33,8 +34,7 @@ public class UnrealFastNoise2 : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"CoreUObject",
-				"FastNoise2"
+				"CoreUObject"
 			}
 			);
 		
