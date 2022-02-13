@@ -240,5 +240,7 @@ Saved/
 Engine/Extras/ThirdPartyNotUE/SDKs/HostLinux/**
 
 !/Binaries/ThirdParty/FastNoise2/Win64/*
+!/Source/ThirdParty/FastNoise2/Win64/Release/FastNoise.lib
+!/Source/ThirdParty/FastNoise2/Win64/Debug/FastNoiseD.lib
 !Resources/*
 .p4ignore
