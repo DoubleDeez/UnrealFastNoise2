@@ -10,26 +10,28 @@ public class FastNoise2 : ModuleRules
 		Type = ModuleType.External;
 		PublicIncludePaths.Add(Path.Combine(ModuleDirectory, "include"));
 
+		string platformString = Target.Platform.ToString();
+
 		// Add the import library
 		if (Target.Configuration == UnrealTargetConfiguration.Debug)
 		{
-			PublicAdditionalLibraries.Add(Path.Combine(ModuleDirectory, "Win64", "Debug", "FastNoiseD.lib"));
+			PublicAdditionalLibraries.Add(Path.Combine(ModuleDirectory, platformString, "Debug", "FastNoiseD.lib"));
 
 			// Delay-load the DLL, so we can load it from the right place first
 			PublicDelayLoadDLLs.Add("FastNoiseD.dll");
 
 			// Ensure that the DLL is staged along with the executable
-			RuntimeDependencies.Add("$(PluginDir)/Binaries/ThirdParty/FastNoise2/Win64/FastNoiseD.dll");
+			RuntimeDependencies.Add(Path.Combine("$(PluginDir)", "Binaries", "ThirdParty", "FastNoise2", platformString, "FastNoiseD.dll"));
 		}
 		else
 		{
-			PublicAdditionalLibraries.Add(Path.Combine(ModuleDirectory, "Win64", "Release", "FastNoise.lib"));
+			PublicAdditionalLibraries.Add(Path.Combine(ModuleDirectory, platformString, "Release", "FastNoise.lib"));
 
 			// Delay-load the DLL, so we can load it from the right place first
 			PublicDelayLoadDLLs.Add("FastNoise.dll");
 
 			// Ensure that the DLL is staged along with the executable
-			RuntimeDependencies.Add("$(PluginDir)/Binaries/ThirdParty/FastNoise2/Win64/FastNoise.dll");
+			RuntimeDependencies.Add(Path.Combine("$(PluginDir)", "Binaries", "ThirdParty", "FastNoise2", platformString, "FastNoise.dll"));
 		}
 	}
 }
