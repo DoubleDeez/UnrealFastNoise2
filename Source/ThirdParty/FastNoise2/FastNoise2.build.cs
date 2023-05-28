@@ -10,28 +10,65 @@ public class FastNoise2 : ModuleRules
 		Type = ModuleType.External;
 		PublicIncludePaths.Add(Path.Combine(ModuleDirectory, "include"));
 
+		string libName = Target.Configuration == UnrealTargetConfiguration.Debug ? "FastNoiseD" : "FastNoise";
+		string configName = Target.Configuration == UnrealTargetConfiguration.Debug ? "Debug" : "Release";
 		string platformString = Target.Platform.ToString();
 
-		// Add the import library
-		if (Target.Configuration == UnrealTargetConfiguration.Debug)
+		PublicAdditionalLibraries.Add(Path.Combine(ModuleDirectory, platformString, configName, libName + StaticLibExtension));
+
+		// Delay-load the DLL, so we can load it from the right place first
+		// TODO - Is this needed for non-dll platforms?
+		PublicDelayLoadDLLs.Add(libName + DynamicLibExtension);
+
+		// Ensure that the DLL is staged along with the executable
+		RuntimeDependencies.Add(Path.Combine("$(PluginDir)", "Binaries", "ThirdParty", "FastNoise2", platformString, libName + DynamicLibExtension));
+	}
+
+	private string StaticLibExtension
+	{
+		get
 		{
-			PublicAdditionalLibraries.Add(Path.Combine(ModuleDirectory, platformString, "Debug", "FastNoiseD.lib"));
+			if (Target.Platform == UnrealTargetPlatform.Mac ||
+			    Target.Platform == UnrealTargetPlatform.IOS ||
+			    Target.Platform == UnrealTargetPlatform.Android ||
+			    Target.Platform == UnrealTargetPlatform.Linux ||
+			    Target.Platform == UnrealTargetPlatform.LinuxArm64)
+			{
+				return ".a";
+			}
+			else if (Target.Platform.IsInGroup(UnrealPlatformGroup.Microsoft))
+			{
+				return ".lib";
+			}
 
-			// Delay-load the DLL, so we can load it from the right place first
-			PublicDelayLoadDLLs.Add("FastNoiseD.dll");
-
-			// Ensure that the DLL is staged along with the executable
-			RuntimeDependencies.Add(Path.Combine("$(PluginDir)", "Binaries", "ThirdParty", "FastNoise2", platformString, "FastNoiseD.dll"));
+			throw new BuildException("Unsupported platform");
 		}
-		else
+	}
+
+	private string DynamicLibExtension
+	{
+		get
 		{
-			PublicAdditionalLibraries.Add(Path.Combine(ModuleDirectory, platformString, "Release", "FastNoise.lib"));
+			if (Target.Platform == UnrealTargetPlatform.Mac)
+			{
+				return ".dylib";
+			}
+			else if (Target.Platform == UnrealTargetPlatform.IOS)
+			{
+				return ".framework";
+			}
+			else if (Target.Platform == UnrealTargetPlatform.Android ||
+			         Target.Platform == UnrealTargetPlatform.Linux ||
+			         Target.Platform == UnrealTargetPlatform.LinuxArm64)
+			{
+				return ".so";
+			}
+			else if (Target.Platform.IsInGroup(UnrealPlatformGroup.Microsoft))
+			{
+				return ".dll";
+			}
 
-			// Delay-load the DLL, so we can load it from the right place first
-			PublicDelayLoadDLLs.Add("FastNoise.dll");
-
-			// Ensure that the DLL is staged along with the executable
-			RuntimeDependencies.Add(Path.Combine("$(PluginDir)", "Binaries", "ThirdParty", "FastNoise2", platformString, "FastNoise.dll"));
+			throw new BuildException("Unsupported platform");
 		}
 	}
 }
