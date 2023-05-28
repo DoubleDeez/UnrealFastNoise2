@@ -239,7 +239,7 @@ Saved/
 # Ignore the headers and cpp files in the clang toolchain on Linux
 Engine/Extras/ThirdPartyNotUE/SDKs/HostLinux/**
 
-!/Binaries/ThirdParty/FastNoise2/Win64/*
+!/Binaries/ThirdParty/FastNoise2/**
 !/Source/ThirdParty/FastNoise2/Win64/Release/FastNoise.lib
 !/Source/ThirdParty/FastNoise2/Win64/Debug/FastNoiseD.lib
 !Resources/*

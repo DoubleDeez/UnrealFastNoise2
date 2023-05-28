@@ -10,42 +10,95 @@ public class FastNoise2 : ModuleRules
 		Type = ModuleType.External;
 		PublicIncludePaths.Add(Path.Combine(ModuleDirectory, "include"));
 
-		string libName = Target.Configuration == UnrealTargetConfiguration.Debug ? "FastNoiseD" : "FastNoise";
-		string configName = Target.Configuration == UnrealTargetConfiguration.Debug ? "Debug" : "Release";
-		string platformString = Target.Platform.ToString();
+		PublicAdditionalLibraries.Add(LibraryPath);
 
-		PublicAdditionalLibraries.Add(Path.Combine(ModuleDirectory, platformString, configName, libName + StaticLibExtension));
-
-		// Delay-load the DLL, so we can load it from the right place first
-		// TODO - Is this needed for non-dll platforms?
-		PublicDelayLoadDLLs.Add(libName + DynamicLibExtension);
+		if (Target.Platform.IsInGroup(UnrealPlatformGroup.Microsoft))
+		{
+			// Delay-load the DLL, so we can load it from the right place first
+			PublicDelayLoadDLLs.Add(LibraryName + RuntimeLibExtension);
+		}
 
 		// Ensure that the DLL is staged along with the executable
-		RuntimeDependencies.Add(Path.Combine("$(PluginDir)", "Binaries", "ThirdParty", "FastNoise2", platformString, libName + DynamicLibExtension));
+		RuntimeDependencies.Add(RuntimePath);
 	}
 
-	private string StaticLibExtension
+	private string ConfigName => Target.Configuration == UnrealTargetConfiguration.Debug ? "Debug" : "Release";
+
+	private string PlatformString => Target.Platform.ToString();
+
+	private string RuntimePath => Path.Combine("$(PluginDir)", "Binaries", "ThirdParty", "FastNoise2", PlatformString, LibraryName + RuntimeLibExtension);
+
+	private string LibraryPath
 	{
 		get
 		{
-			if (Target.Platform == UnrealTargetPlatform.Mac ||
-			    Target.Platform == UnrealTargetPlatform.IOS ||
-			    Target.Platform == UnrealTargetPlatform.Android ||
-			    Target.Platform == UnrealTargetPlatform.Linux ||
-			    Target.Platform == UnrealTargetPlatform.LinuxArm64)
+			if (Target.Platform.IsInGroup(UnrealPlatformGroup.Microsoft))
 			{
-				return ".a";
+				return Path.Combine(ModuleDirectory, PlatformString, ConfigName, LibraryName + LibraryExtension);
 			}
-			else if (Target.Platform.IsInGroup(UnrealPlatformGroup.Microsoft))
+			else
 			{
-				return ".lib";
+				return RuntimePath;
+			}
+		}
+	}
+
+	private string LibraryName
+	{
+		get
+		{
+			if (Target.Configuration == UnrealTargetConfiguration.Debug)
+			{
+				if (Target.Platform == UnrealTargetPlatform.Mac ||
+				    Target.Platform == UnrealTargetPlatform.IOS ||
+				    Target.Platform == UnrealTargetPlatform.Android ||
+				    Target.Platform == UnrealTargetPlatform.Linux ||
+				    Target.Platform == UnrealTargetPlatform.LinuxArm64)
+				{
+					return "libFastNoiseD";
+				}
+				else if (Target.Platform.IsInGroup(UnrealPlatformGroup.Microsoft))
+				{
+					return "FastNoiseD";
+				}
+			}
+			else
+			{
+
+				if (Target.Platform == UnrealTargetPlatform.Mac ||
+				    Target.Platform == UnrealTargetPlatform.IOS ||
+				    Target.Platform == UnrealTargetPlatform.Android ||
+				    Target.Platform == UnrealTargetPlatform.Linux ||
+				    Target.Platform == UnrealTargetPlatform.LinuxArm64)
+				{
+					return "libFastNoise";
+				}
+				else if (Target.Platform.IsInGroup(UnrealPlatformGroup.Microsoft))
+				{
+					return "FastNoise";
+				}
 			}
 
 			throw new BuildException("Unsupported platform");
 		}
 	}
 
-	private string DynamicLibExtension
+	private string LibraryExtension
+	{
+		get
+		{
+			if (Target.Platform.IsInGroup(UnrealPlatformGroup.Microsoft))
+			{
+				return ".lib";
+			}
+			else
+			{
+				return RuntimeLibExtension;
+			}
+		}
+	}
+
+	private string RuntimeLibExtension
 	{
 		get
 		{
