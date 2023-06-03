@@ -22,11 +22,29 @@ public class FastNoise2 : ModuleRules
 		RuntimeDependencies.Add(RuntimePath);
 	}
 
-	private string ConfigName => Target.Configuration == UnrealTargetConfiguration.Debug ? "Debug" : "Release";
+	private string ConfigName
+	{
+		get
+		{
+			return Target.Configuration == UnrealTargetConfiguration.Debug ? "Debug" : "Release";
+		}
+	}
 
-	private string PlatformString => Target.Platform.ToString();
+	private string PlatformString
+	{
+		get
+		{
+			return Target.Platform.ToString();
+		}
+	}
 
-	private string RuntimePath => Path.Combine("$(PluginDir)", "Binaries", "ThirdParty", "FastNoise2", PlatformString, LibraryName + RuntimeLibExtension);
+	private string RuntimePath
+	{
+		get
+		{
+			return Path.Combine("$(PluginDir)", "Binaries", "ThirdParty", "FastNoise2", PlatformString, LibraryName + RuntimeLibExtension);
+		}
+	}
 
 	private string LibraryPath
 	{
