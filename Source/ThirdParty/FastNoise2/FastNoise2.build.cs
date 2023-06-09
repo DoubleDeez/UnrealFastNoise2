@@ -10,28 +10,136 @@ public class FastNoise2 : ModuleRules
 		Type = ModuleType.External;
 		PublicIncludePaths.Add(Path.Combine(ModuleDirectory, "include"));
 
-		string platformString = Target.Platform.ToString();
+		PublicAdditionalLibraries.Add(LibraryPath);
 
-		// Add the import library
-		if (Target.Configuration == UnrealTargetConfiguration.Debug)
+		if (Target.Platform.IsInGroup(UnrealPlatformGroup.Microsoft))
 		{
-			PublicAdditionalLibraries.Add(Path.Combine(ModuleDirectory, platformString, "Debug", "FastNoiseD.lib"));
-
 			// Delay-load the DLL, so we can load it from the right place first
-			PublicDelayLoadDLLs.Add("FastNoiseD.dll");
-
-			// Ensure that the DLL is staged along with the executable
-			RuntimeDependencies.Add(Path.Combine("$(PluginDir)", "Binaries", "ThirdParty", "FastNoise2", platformString, "FastNoiseD.dll"));
+			PublicDelayLoadDLLs.Add(LibraryName + RuntimeLibExtension);
 		}
-		else
+
+		// Ensure that the DLL is staged along with the executable
+		RuntimeDependencies.Add(RuntimePath);
+	}
+
+	private string ConfigName
+	{
+		get
 		{
-			PublicAdditionalLibraries.Add(Path.Combine(ModuleDirectory, platformString, "Release", "FastNoise.lib"));
+			return Target.Configuration == UnrealTargetConfiguration.Debug ? "Debug" : "Release";
+		}
+	}
 
-			// Delay-load the DLL, so we can load it from the right place first
-			PublicDelayLoadDLLs.Add("FastNoise.dll");
+	private string PlatformString
+	{
+		get
+		{
+			return Target.Platform.ToString();
+		}
+	}
 
-			// Ensure that the DLL is staged along with the executable
-			RuntimeDependencies.Add(Path.Combine("$(PluginDir)", "Binaries", "ThirdParty", "FastNoise2", platformString, "FastNoise.dll"));
+	private string RuntimePath
+	{
+		get
+		{
+			return Path.Combine("$(PluginDir)", "Binaries", "ThirdParty", "FastNoise2", PlatformString, LibraryName + RuntimeLibExtension);
+		}
+	}
+
+	private string LibraryPath
+	{
+		get
+		{
+			if (Target.Platform.IsInGroup(UnrealPlatformGroup.Microsoft))
+			{
+				return Path.Combine(ModuleDirectory, PlatformString, ConfigName, LibraryName + LibraryExtension);
+			}
+			else
+			{
+				return RuntimePath;
+			}
+		}
+	}
+
+	private string LibraryName
+	{
+		get
+		{
+			if (Target.Configuration == UnrealTargetConfiguration.Debug)
+			{
+				if (Target.Platform == UnrealTargetPlatform.Mac ||
+				    Target.Platform == UnrealTargetPlatform.IOS ||
+				    Target.Platform == UnrealTargetPlatform.Android ||
+				    Target.Platform == UnrealTargetPlatform.Linux ||
+				    Target.Platform == UnrealTargetPlatform.LinuxArm64)
+				{
+					return "libFastNoiseD";
+				}
+				else if (Target.Platform.IsInGroup(UnrealPlatformGroup.Microsoft))
+				{
+					return "FastNoiseD";
+				}
+			}
+			else
+			{
+
+				if (Target.Platform == UnrealTargetPlatform.Mac ||
+				    Target.Platform == UnrealTargetPlatform.IOS ||
+				    Target.Platform == UnrealTargetPlatform.Android ||
+				    Target.Platform == UnrealTargetPlatform.Linux ||
+				    Target.Platform == UnrealTargetPlatform.LinuxArm64)
+				{
+					return "libFastNoise";
+				}
+				else if (Target.Platform.IsInGroup(UnrealPlatformGroup.Microsoft))
+				{
+					return "FastNoise";
+				}
+			}
+
+			throw new BuildException("Unsupported platform");
+		}
+	}
+
+	private string LibraryExtension
+	{
+		get
+		{
+			if (Target.Platform.IsInGroup(UnrealPlatformGroup.Microsoft))
+			{
+				return ".lib";
+			}
+			else
+			{
+				return RuntimeLibExtension;
+			}
+		}
+	}
+
+	private string RuntimeLibExtension
+	{
+		get
+		{
+			if (Target.Platform == UnrealTargetPlatform.Mac)
+			{
+				return ".dylib";
+			}
+			else if (Target.Platform == UnrealTargetPlatform.IOS)
+			{
+				return ".framework";
+			}
+			else if (Target.Platform == UnrealTargetPlatform.Android ||
+			         Target.Platform == UnrealTargetPlatform.Linux ||
+			         Target.Platform == UnrealTargetPlatform.LinuxArm64)
+			{
+				return ".so";
+			}
+			else if (Target.Platform.IsInGroup(UnrealPlatformGroup.Microsoft))
+			{
+				return ".dll";
+			}
+
+			throw new BuildException("Unsupported platform");
 		}
 	}
 }
