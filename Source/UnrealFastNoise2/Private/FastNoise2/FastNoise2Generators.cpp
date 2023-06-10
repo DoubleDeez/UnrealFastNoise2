@@ -158,7 +158,7 @@ void UFastNoise2EncodedNodeTreeGenerator::PostInitProperties()
 	}
 }
 
-void UFastNoise2EncodedNodeTreeGenerator::SetEncodedNodeTree(FString InValue)
+void UFastNoise2EncodedNodeTreeGenerator::SetEncodedNodeTree(const FString& InValue)
 {
 	EncodedNodeTree = InValue;
 	ResetGenerator();
@@ -227,7 +227,7 @@ FastNoise::SmartNode<FastNoise::Generator> UFastNoise2SineWaveGenerator::InitGen
 
 //////////////////////////////////////////////////////////////////////////
 
-void UFastNoise2PositionOutputGenerator::SetData(FVector4 InMultipliers, FVector4 InOffsets)
+void UFastNoise2PositionOutputGenerator::SetData(const FVector4& InMultipliers, const FVector4& InOffsets)
 {
 	check(PositionOutputGeneratorInst.get());
 	Offsets = InOffsets;
@@ -237,12 +237,12 @@ void UFastNoise2PositionOutputGenerator::SetData(FVector4 InMultipliers, FVector
 	PositionOutputGeneratorInst->Set<FastNoise::Dim::W>(InMultipliers.W, InOffsets.W);
 }
 
-void UFastNoise2PositionOutputGenerator::SetMultipliers(FVector4 InMultipliers)
+void UFastNoise2PositionOutputGenerator::SetMultipliers(const FVector4& InMultipliers)
 {
 	SetData(InMultipliers, Offsets);
 }
 
-void UFastNoise2PositionOutputGenerator::SetOffsets(FVector4 InOffsets)
+void UFastNoise2PositionOutputGenerator::SetOffsets(const FVector4& InOffsets)
 {
 	SetData(Multipliers, InOffsets);
 }
@@ -272,7 +272,7 @@ void UFastNoise2DistanceToPointGenerator::SetDistanceFunction(EFastNoise2Distanc
 	DistanceToPointGeneratorInst->SetDistanceFunction(FFastNoise2Helpers::ConvertUnrealToFastNoiseDistanceFunction(InDistanceFunction));
 }
 
-void UFastNoise2DistanceToPointGenerator::SetScale(FVector4 InScale)
+void UFastNoise2DistanceToPointGenerator::SetScale(const FVector4& InScale)
 {
 	check(DistanceToPointGeneratorInst.get());
 	Scale = InScale;
@@ -320,6 +320,14 @@ FastNoise::SmartNode<FastNoise::Generator> UFastNoise2OpenSimplex2Generator::Ini
 {
 	OpenSimplex2GeneratorInst = FastNoise::New<FastNoise::OpenSimplex2>();
 	return OpenSimplex2GeneratorInst;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+FastNoise::SmartNode<FastNoise::Generator> UFastNoise2OpenSimplex2SGenerator::InitGenerator()
+{
+	OpenSimplex2SGeneratorInst = FastNoise::New<FastNoise::OpenSimplex2S>();
+	return OpenSimplex2SGeneratorInst;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1023,7 +1031,7 @@ void UFastNoise2DomainOffsetGenerator::SetOffsetSources(UFastNoise2GeneratorBase
 	}
 }
 
-void UFastNoise2DomainOffsetGenerator::SetOffsetValues(FVector4 InValue)
+void UFastNoise2DomainOffsetGenerator::SetOffsetValues(const FVector4& InValue)
 {
 	check(DomainOffsetGeneratorInst.get());
 	Offsets = InValue;
@@ -1051,7 +1059,7 @@ void UFastNoise2DomainRotateGenerator::SetSource(UFastNoise2GeneratorBase* InSou
 	}
 }
 
-void UFastNoise2DomainRotateGenerator::SetRotation(FRotator InValue)
+void UFastNoise2DomainRotateGenerator::SetRotation(const FRotator& InValue)
 {
 	check(DomainRotateGeneratorInst.get());
 	Rotation = InValue;
@@ -1218,7 +1226,7 @@ void UFastNoise2DomainAxisScaleGenerator::SetSource(UFastNoise2GeneratorBase* In
 	}
 }
 
-void UFastNoise2DomainAxisScaleGenerator::SetScale(FVector4 InValue)
+void UFastNoise2DomainAxisScaleGenerator::SetScale(const FVector4& InValue)
 {
 	check(DomainAxisScaleGeneratorInst.get());
 	Scale = InValue;

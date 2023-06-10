@@ -70,6 +70,11 @@ UFastNoise2OpenSimplex2Generator* UFastNoise2BlueprintLibrary::MakeOpenSimplex2G
 	return NewObject<UFastNoise2OpenSimplex2Generator>();
 }
 
+UFastNoise2OpenSimplex2SGenerator* UFastNoise2BlueprintLibrary::MakeOpenSimplex2SGenerator()
+{
+	return NewObject<UFastNoise2OpenSimplex2SGenerator>();
+}
+
 UFastNoise2CellularValueGenerator* UFastNoise2BlueprintLibrary::MakeCellularValueGenerator(UFastNoise2GeneratorBase* JitterModifierSource, float JitterModifierValue, EFastNoise2DistanceFunction DistanceFunction, int32 ValueIndex)
 {
 	UFastNoise2CellularValueGenerator* Gen = NewObject<UFastNoise2CellularValueGenerator>();
