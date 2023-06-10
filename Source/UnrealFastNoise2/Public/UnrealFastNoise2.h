@@ -13,5 +13,5 @@ public:
 	virtual void ShutdownModule() override;
 
 private:
-	void* FastNoiseHandle;
+	void* FastNoiseHandle = nullptr;
 };

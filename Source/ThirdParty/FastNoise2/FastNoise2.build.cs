@@ -12,14 +12,13 @@ public class FastNoise2 : ModuleRules
 
 		PublicAdditionalLibraries.Add(LibraryPath);
 
-		if (Target.Platform.IsInGroup(UnrealPlatformGroup.Microsoft))
-		{
-			// Delay-load the DLL, so we can load it from the right place first
-			PublicDelayLoadDLLs.Add(LibraryName + RuntimeLibExtension);
-		}
+		// Delay-load the library, so we can load it from the right place first
+		PublicDelayLoadDLLs.Add(LibraryName + RuntimeLibExtension);
 
-		// Ensure that the DLL is staged along with the executable
+		// Ensure that the library is staged along with the executable
 		RuntimeDependencies.Add(RuntimePath);
+
+		PublicDefinitions.Add("FASTNOISE_LIBRARY_PATH=\"" + RelativeRuntimePath.Replace("\\", "\\\\") + "\"");
 	}
 
 	private string ConfigName
@@ -42,7 +41,15 @@ public class FastNoise2 : ModuleRules
 	{
 		get
 		{
-			return Path.Combine("$(PluginDir)", "Binaries", "ThirdParty", "FastNoise2", PlatformString, LibraryName + RuntimeLibExtension);
+			return Path.Combine("$(PluginDir)", RelativeRuntimePath);
+		}
+	}
+
+	private string RelativeRuntimePath
+	{
+		get
+		{
+			return Path.Combine("Binaries", "ThirdParty", "FastNoise2", PlatformString, LibraryName + RuntimeLibExtension);
 		}
 	}
 
