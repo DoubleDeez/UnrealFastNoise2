@@ -10,27 +10,32 @@ on:
   workflow_dispatch:
 
 jobs:
+  versions:
+    name: Read UE versions
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.read.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: read
+        run: echo "matrix=$(jq -c . .github/ue-versions.json)" >> "$GITHUB_OUTPUT"
+
   build:
+    needs: versions
     name: UE ${{ matrix.ue }}
     runs-on: [self-hosted, windows, 'ue-${{ matrix.ue }}']
     strategy:
       fail-fast: false
       matrix:
-        ue: ['5.4', '5.5', '5.6', '5.7', '5.8']
+        ue: ${{ fromJSON(needs.versions.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
 
       - name: Locate engine
         shell: pwsh
         run: |
-          $map = @{
-            '5.4' = '${{ vars.UE_ROOT_5_4 }}'
-            '5.5' = '${{ vars.UE_ROOT_5_5 }}'
-            '5.6' = '${{ vars.UE_ROOT_5_6 }}'
-            '5.7' = '${{ vars.UE_ROOT_5_7 }}'
-            '5.8' = '${{ vars.UE_ROOT_5_8 }}'
-          }
-          $root = $map['${{ matrix.ue }}']
+          $var = 'UE_ROOT_' + '${{ matrix.ue }}'.Replace('.', '_')
+          $root = (ConvertFrom-Json '${{ toJSON(vars) }}').$var
           if (-not $root) { $root = "C:\Program Files\Epic Games\UE_${{ matrix.ue }}" }
           if (-not (Test-Path "$root\Engine\Build\BatchFiles\RunUAT.bat")) {
             throw "Unreal Engine ${{ matrix.ue }} not found at $root"
