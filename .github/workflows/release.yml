@@ -3,6 +3,8 @@ name: Release
 # Manual build of the plugin for Unreal Engine 5.8, published as a GitHub release.
 # Run from the Actions tab and enter the release name/tag (e.g. v1.2.0).
 #
+# Only runs on the NorwinLabs fork; it never runs (or releases) on the upstream repo.
+#
 # Needs a self-hosted Windows runner labelled `ue-5.8`. The engine is found at the
 # repository variable UE_ROOT_5_8, falling back to
 # C:\Program Files\Epic Games\UE_5.8.
@@ -29,6 +31,7 @@ env:
 jobs:
   release:
     name: Build and release (UE 5.8)
+    if: github.repository == 'NorwinLabs/UnrealFastNoise2'
     runs-on: [self-hosted, windows, ue-5.8]
     steps:
       - uses: actions/checkout@v4
