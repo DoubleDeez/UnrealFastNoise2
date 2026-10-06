@@ -1,0 +1,48 @@
+name: Build
+
+# Verifies the plugin compiles against each supported engine version.
+# Runs on the same self-hosted Windows runner(s) as the release workflow.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: UE ${{ matrix.ue }}
+    runs-on: [self-hosted, windows, 'ue-${{ matrix.ue }}']
+    strategy:
+      fail-fast: false
+      matrix:
+        ue: ['5.4', '5.5', '5.6', '5.7', '5.8']
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Locate engine
+        shell: pwsh
+        run: |
+          $map = @{
+            '5.4' = '${{ vars.UE_ROOT_5_4 }}'
+            '5.5' = '${{ vars.UE_ROOT_5_5 }}'
+            '5.6' = '${{ vars.UE_ROOT_5_6 }}'
+            '5.7' = '${{ vars.UE_ROOT_5_7 }}'
+            '5.8' = '${{ vars.UE_ROOT_5_8 }}'
+          }
+          $root = $map['${{ matrix.ue }}']
+          if (-not $root) { $root = "C:\Program Files\Epic Games\UE_${{ matrix.ue }}" }
+          if (-not (Test-Path "$root\Engine\Build\BatchFiles\RunUAT.bat")) {
+            throw "Unreal Engine ${{ matrix.ue }} not found at $root"
+          }
+          "UE_ROOT=$root" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Build plugin
+        shell: pwsh
+        run: |
+          $out = Join-Path $env:RUNNER_TEMP 'UnrealFastNoise2'
+          if (Test-Path $out) { Remove-Item $out -Recurse -Force }
+          & "$env:UE_ROOT\Engine\Build\BatchFiles\RunUAT.bat" BuildPlugin `
+            -Plugin="$env:GITHUB_WORKSPACE\UnrealFastNoise2.uplugin" `
+            -Package="$out" -TargetPlatforms=Win64 -Rocket
+          if ($LASTEXITCODE -ne 0) { throw "BuildPlugin failed ($LASTEXITCODE)" }

@@ -74,6 +74,7 @@
 # Other configuration and markup files
 !*.ini
 !*.json
+!*.yml
 !*.tps
 !*.xml
 !*.xaml
