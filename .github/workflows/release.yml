@@ -1,0 +1,87 @@
+name: Release
+
+# Manual build of the plugin for Unreal Engine 5.8, published as a GitHub release.
+# Run from the Actions tab and enter the release name/tag (e.g. v1.2.0).
+#
+# Only runs on the NorwinLabs fork; it never runs (or releases) on the upstream repo.
+#
+# Needs a self-hosted Windows runner labelled `ue-5.8`. The engine is found at the
+# repository variable UE_ROOT_5_8, falling back to
+# C:\Program Files\Epic Games\UE_5.8.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release name/tag, e.g. v1.2.0'
+        required: true
+      draft:
+        description: 'Create as a draft release'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+env:
+  PLUGIN_NAME: UnrealFastNoise2
+  UE_VERSION: '5.8'
+  RELEASE_VERSION: ${{ github.event.inputs.version }}
+
+jobs:
+  release:
+    name: Build and release (UE 5.8)
+    if: github.repository == 'NorwinLabs/UnrealFastNoise2'
+    runs-on: [self-hosted, windows, ue-5.8]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Locate engine
+        shell: pwsh
+        run: |
+          $root = '${{ vars.UE_ROOT_5_8 }}'
+          if (-not $root) { $root = "C:\Program Files\Epic Games\UE_$env:UE_VERSION" }
+          if (-not (Test-Path "$root\Engine\Build\BatchFiles\RunUAT.bat")) {
+            throw "Unreal Engine $env:UE_VERSION not found at $root"
+          }
+          "UE_ROOT=$root" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Stamp plugin descriptor
+        shell: pwsh
+        run: |
+          $path = "$env:PLUGIN_NAME.uplugin"
+          $json = Get-Content $path -Raw | ConvertFrom-Json
+          $json.VersionName = $env:RELEASE_VERSION -replace '^v', ''
+          $json | Add-Member -NotePropertyName EngineVersion -NotePropertyValue "$env:UE_VERSION.0" -Force
+          $json | ConvertTo-Json -Depth 10 | Set-Content $path -Encoding utf8
+
+      - name: Build plugin
+        shell: pwsh
+        run: |
+          $out = Join-Path $env:RUNNER_TEMP $env:PLUGIN_NAME
+          if (Test-Path $out) { Remove-Item $out -Recurse -Force }
+          & "$env:UE_ROOT\Engine\Build\BatchFiles\RunUAT.bat" BuildPlugin `
+            -Plugin="$env:GITHUB_WORKSPACE\$env:PLUGIN_NAME.uplugin" `
+            -Package="$out" -TargetPlatforms=Win64 -Rocket
+          if ($LASTEXITCODE -ne 0) { throw "BuildPlugin failed ($LASTEXITCODE)" }
+
+      - name: Zip
+        shell: pwsh
+        run: |
+          $out = Join-Path $env:RUNNER_TEMP $env:PLUGIN_NAME
+          Remove-Item "$out\Intermediate" -Recurse -Force -ErrorAction SilentlyContinue
+          $zip = "$env:PLUGIN_NAME-$env:RELEASE_VERSION-UE$env:UE_VERSION.zip"
+          Compress-Archive -Path "$out\*" -DestinationPath "$env:GITHUB_WORKSPACE\$zip" -Force
+          "ZIP_NAME=$zip" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.RELEASE_VERSION }}
+          name: UnrealFastNoise2 ${{ env.RELEASE_VERSION }}
+          draft: ${{ github.event.inputs.draft }}
+          generate_release_notes: true
+          files: ${{ env.ZIP_NAME }}
+          body: |
+            Prebuilt plugin package for Unreal Engine 5.8.
+            Extract the zip into your project's `Plugins` folder.

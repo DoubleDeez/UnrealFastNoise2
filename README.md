@@ -6,6 +6,8 @@ UnrealFastNoise2 is an Unreal Engine plugin that wraps [FastNoise2](https://gith
 
 ![Sample of Simple Terrain noise setup in Blueprint](Resources/SimpleTerrainSample.png)
 
+Supported Unreal Engine versions: **5.8**. A prebuilt package is attached to every [release](../../releases) — download the zip and extract it into your project's `Plugins` folder.
+
 Install Tips:
 
 Use #include <FastNoise/FastNoise.h> in whatever file you need to call the FastNoise2 functions in.
